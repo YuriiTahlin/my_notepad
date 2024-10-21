@@ -1,0 +1,101 @@
+{% extends 'my_app/layout.html' %}
+
+
+{% block content %}
+<header>
+    <div class="header_block">
+        <div class="sort">
+            <a href="{{ url_for('home') }}">Всі</a>
+            <a href="{{ url_for('home', status='active') }}">Активні</a>
+            <a href="{{ url_for('home', status='completed') }}">Завершені</a>
+        </div>
+        <p class="main_name">Flask Notepad</p>
+        <div class="add_notations" id="add_notation"><i class="fa-solid fa-bars"></i></div>
+    </div>
+    <div id="add_notations_block" class="add_notations_block">
+        <div class="add_notations_elements">
+            <i id="close_add" class="close_add fa-solid fa-xmark"></i>
+            <form class="add_notations_form" action="/add" method="post">
+                <p>Створіть нову замітку!</p>
+                <input type="text" name="title" placeholder="Введіть назву замітки" required>
+                <div id="subtasks"></div>
+                <button type="button" onclick="addSubtask()">Додати підпункт</button>
+                <button type="submit">Додати замітку</button>
+            </form>
+        </div>
+    </div>
+</header>
+<main>
+    <div class="notations_block">
+        {% for todo in todo_list %}
+            <div class="notation_block">
+                <p class="notation_title">{{ todo.title }}</p>
+                <i onclick="openEditMenu('{{ todo.id }}')" class="edit fa-regular fa-pen-to-square"></i>
+                <a class="cancel" href="/delete/{{ todo.id }}"><i class="fa-solid fa-xmark"></i></a>
+                <div class="subtasks">
+                    {% for subtask in todo.subtasks %}
+                        <div class="subtask_block">
+                            <ul>
+                                <li>
+                                    <div class="subtask_li">
+                                        <form class="subtask_form col-12" action="/update/subtask/{{ subtask.id }}" method="post">
+                                            {% if subtask.is_complete == False %}
+                                                <div class="subtask_text_block">
+                                                    <span class="active_status">{{ subtask.title }}</span></span>
+                                                </div>
+                                                <button type="submit"><i class="fa-solid fa-check"></i></button>
+                                            {% else %}
+                                                <div class="subtask_text_block">
+                                                    <span class="dis_status">{{ subtask.title }}</span></span>
+                                                </div>
+                                                <button type="submit"><i class="fa-solid fa-repeat"></i></i></button>
+                                            {% endif %}
+                                        </form>
+                                        <form action="/delete/subtask/{{ subtask.id }}" method="post">
+                                            <button type="submit"><i class="fa-solid fa-xmark"></i></button>
+                                        </form>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="status">
+                    <form action="/update/{{ todo.id }}" method="post">
+                        {% if todo.is_complete == False %}
+                            <div class="status_block">
+                                <span class="notation_status">Статус: <span class="active_status">Активно</span></span>
+                                <button class="active_button" type="submit">Завершити</button>
+                            </div>
+                        {% else %}
+                            <div class="status_block">
+                                <span class="notation_status">Статус: <span class="dis_status">Завершено</span></span>
+                                <button class="button_dis" type="submit">Відновити</button>
+                            </div>
+                        {% endif %}
+                    </form>
+                </div>
+                <div id="edit_notation_block_{{ todo.id }}" class="edit_notation_block">
+                    <form class="edit_notation_form" action="/edit/{{ todo.id }}" method="post">
+                        <p>Бажаєте змінити замітку?</p>
+                        <input class="edit_notation_title" type="text" name="title" value="{{ todo.title }}" required>
+                        <div id="subtasks_el_{{ todo.id }}">
+                            {% for subtask in todo.subtasks %}
+                                <div class="subtask_edit_block">
+                                    <input type="text" name="subtask_title_{{ todo.id }}_{{ loop.index }}" value="{{ subtask.title }}" required><br>
+                                    <i class="edit_left fa-solid fa-delete-left" onclick="removeEditSubtask(this)"></i>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="edit_buttons_menu">
+                            <button class="edit_button_add_sub" type="button" onclick="addEditSubtask('{{ todo.id }}')">Додати підпункт</button>
+                            <button type="submit">Зберегти</button>
+                        </div>
+<!--                        <i class="edit_button_close fa-solid fa-xmark" onclick="closeEditMenu('{{ todo.id }}')"></i>-->
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</main>
+{% endblock content %}
